@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 import {
   IconAlertCircle,
@@ -17,8 +18,22 @@ const Register = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setError("");
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate("/");
+    } catch (err) {
+      setError(err.response?.data?.message || "Google sign up failed. Please try again.");
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google sign up was unsuccessful. Please try again.");
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -152,6 +167,27 @@ const Register = () => {
               )}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Or continue with
+            </span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          {/* Google Sign Up */}
+          <div className="flex justify-center w-full">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              shape="rectangular"
+              text="signup_with"
+            />
+          </div>
 
           <div className="mt-6 pt-5 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-500">
