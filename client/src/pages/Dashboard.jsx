@@ -178,7 +178,7 @@ const Dashboard = () => {
   }, [tasks]);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen bg-[#F7F5F0] dark:bg-[#121215] text-stone-900 dark:text-stone-100 warm-grid-bg transition-colors">
       <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div className="flex w-full">
@@ -198,14 +198,14 @@ const Dashboard = () => {
         {/* Main Workspace View */}
         <main className="flex-1 max-w-7xl px-4 sm:px-8 py-8 mx-auto w-full min-w-0">
           {error && (
-            <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 rounded-xl flex items-center justify-between text-rose-700 dark:text-rose-400 text-xs sm:text-sm font-medium animate-fade-in">
+            <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-900/50 rounded-xl flex items-center justify-between text-orange-800 dark:text-orange-300 text-xs sm:text-sm font-medium animate-fade-in">
               <div className="flex items-center gap-2">
                 <IconAlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
               </div>
               <button
                 onClick={() => setError("")}
-                className="text-rose-400 hover:text-rose-600 dark:hover:text-rose-300 p-1 cursor-pointer"
+                className="text-orange-400 hover:text-orange-600 dark:hover:text-orange-300 p-1 cursor-pointer"
               >
                 <IconX className="w-4 h-4" />
               </button>
@@ -216,27 +216,27 @@ const Dashboard = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
                   Task Workspace
                 </h1>
                 {categoryFilter && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                     Category: {categoryFilter}
                   </span>
                 )}
               </div>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1">
                 Monitor deadlines, organize by category, and maintain productivity.
               </p>
             </div>
 
             <button
               onClick={openCreate}
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xs hover:shadow transition-all cursor-pointer self-start sm:self-auto"
             >
               <IconPlus className="w-4 h-4" />
               <span>Create Task</span>
-              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-slate-800 dark:bg-indigo-800 text-slate-300 rounded border border-slate-700 dark:border-indigo-700">
+              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] font-mono bg-blue-700 dark:bg-blue-800 text-blue-100 rounded border border-blue-500/40">
                 N
               </kbd>
             </button>
@@ -245,27 +245,27 @@ const Dashboard = () => {
           {/* 4 Executive KPI Metrics */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 mb-8">
             {/* Card 1: Total */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl p-5 border border-stone-200/90 dark:border-stone-800 shadow-xs hover:shadow-sm transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Total Tasks
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 flex items-center justify-center">
                   <IconClipboardList className="w-4 h-4" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                <span className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
                   {stats.total}
                 </span>
-                <span className="text-xs text-slate-400 dark:text-slate-500 font-medium">registered</span>
+                <span className="text-xs text-stone-400 dark:text-stone-500 font-medium">registered</span>
               </div>
             </div>
 
             {/* Card 2: Pending */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl p-5 border border-stone-200/90 dark:border-stone-800 shadow-xs hover:shadow-sm transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   In Progress
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 flex items-center justify-center">
@@ -273,7 +273,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                <span className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
                   {stats.pending}
                 </span>
                 <span className="text-xs text-amber-700 dark:text-amber-400 font-medium">pending</span>
@@ -281,9 +281,9 @@ const Dashboard = () => {
             </div>
 
             {/* Card 3: Completed */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl p-5 border border-stone-200/90 dark:border-stone-800 shadow-xs hover:shadow-sm transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Completed
                 </span>
                 <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
@@ -291,14 +291,14 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                <span className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
                   {stats.completed}
                 </span>
                 <span className="text-xs text-emerald-700 dark:text-emerald-400 font-semibold">
                   {stats.percent}% done
                 </span>
               </div>
-              <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 mt-3 overflow-hidden">
+              <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1.5 mt-3 overflow-hidden">
                 <div
                   className="bg-emerald-600 dark:bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
                   style={{ width: `${stats.percent}%` }}
@@ -307,29 +307,29 @@ const Dashboard = () => {
             </div>
 
             {/* Card 4: Urgent */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl p-5 border border-stone-200/90 dark:border-stone-800 shadow-xs hover:shadow-sm transition-all">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   High Priority
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-400 flex items-center justify-center">
                   <IconTrendingUp className="w-4 h-4" />
                 </div>
               </div>
               <div className="mt-3 flex items-baseline gap-2">
-                <span className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">
+                <span className="text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100">
                   {stats.highPriority}
                 </span>
-                <span className="text-xs text-rose-700 dark:text-rose-400 font-medium">urgent tasks</span>
+                <span className="text-xs text-orange-700 dark:text-orange-400 font-medium">urgent tasks</span>
               </div>
             </div>
           </div>
 
           {/* Filter, Search & View Controls Bar */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4 mb-6 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+          <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl p-3.5 sm:p-4 mb-6 border border-stone-200/90 dark:border-stone-800 shadow-xs flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
             {/* Search box with / keyboard shortcut */}
             <div className="relative flex-1 min-w-[200px]">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
                 <IconSearch className="w-4 h-4" />
               </div>
               <input
@@ -338,18 +338,18 @@ const Dashboard = () => {
                 placeholder="Search tasks by title (press '/' to focus)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-12 py-2 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition"
+                className="w-full pl-9 pr-12 py-2 bg-stone-50/70 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 rounded-xl text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
               />
               {search ? (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 cursor-pointer"
                 >
                   <IconX className="w-4 h-4" />
                 </button>
               ) : (
                 <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-700">
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono text-stone-400 bg-white dark:bg-stone-800 rounded border border-stone-200 dark:border-stone-700">
                     /
                   </kbd>
                 </div>
@@ -359,14 +359,14 @@ const Dashboard = () => {
             {/* Filter options */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Status Segmented Tabs */}
-              <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-medium text-slate-600 dark:text-slate-400">
+              <div className="inline-flex p-1 bg-stone-100 dark:bg-stone-800 rounded-xl text-xs font-medium text-stone-600 dark:text-stone-400">
                 <button
                   type="button"
                   onClick={() => setStatusFilter("")}
                   className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                     statusFilter === ""
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold shadow-xs"
-                      : "hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-semibold shadow-xs"
+                      : "hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   All
@@ -376,8 +376,8 @@ const Dashboard = () => {
                   onClick={() => setStatusFilter("pending")}
                   className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                     statusFilter === "pending"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold shadow-xs"
-                      : "hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-semibold shadow-xs"
+                      : "hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   Pending
@@ -387,8 +387,8 @@ const Dashboard = () => {
                   onClick={() => setStatusFilter("completed")}
                   className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
                     statusFilter === "completed"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold shadow-xs"
-                      : "hover:text-slate-900 dark:hover:text-slate-200"
+                      ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 font-semibold shadow-xs"
+                      : "hover:text-stone-900 dark:hover:text-stone-200"
                   }`}
                 >
                   Completed
@@ -400,7 +400,7 @@ const Dashboard = () => {
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-3 pr-7 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer transition"
+                  className="appearance-none bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl pl-3 pr-7 py-2 text-xs font-medium text-stone-700 dark:text-stone-200 hover:border-stone-300 dark:hover:border-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 cursor-pointer transition"
                 >
                   <option value="">Category: All</option>
                   <option value="Work">Work</option>
@@ -408,7 +408,7 @@ const Dashboard = () => {
                   <option value="Urgent">Urgent</option>
                   <option value="Other">Other</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-stone-400">
                   <IconTag className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -418,14 +418,14 @@ const Dashboard = () => {
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value)}
-                  className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-3 pr-7 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer transition"
+                  className="appearance-none bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl pl-3 pr-7 py-2 text-xs font-medium text-stone-700 dark:text-stone-200 hover:border-stone-300 dark:hover:border-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 cursor-pointer transition"
                 >
                   <option value="">Priority: All</option>
                   <option value="high">High</option>
                   <option value="medium">Medium</option>
                   <option value="low">Low</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-stone-400">
                   <IconFilter className="w-3.5 h-3.5" />
                 </div>
               </div>
@@ -435,26 +435,26 @@ const Dashboard = () => {
                 <select
                   value={sort}
                   onChange={(e) => setSort(e.target.value)}
-                  className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-3 pr-7 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:border-slate-300 dark:hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer transition"
+                  className="appearance-none bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-xl pl-3 pr-7 py-2 text-xs font-medium text-stone-700 dark:text-stone-200 hover:border-stone-300 dark:hover:border-stone-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 cursor-pointer transition"
                 >
                   <option value="">Sort: Newest</option>
                   <option value="dueDate">Due Date</option>
                   <option value="priority">Priority</option>
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-stone-400">
                   <IconArrowUpDown className="w-3.5 h-3.5" />
                 </div>
               </div>
 
               {/* View Mode Switcher */}
-              <div className="inline-flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs text-slate-600 dark:text-slate-400">
+              <div className="inline-flex p-1 bg-stone-100 dark:bg-stone-800 rounded-xl text-xs text-stone-600 dark:text-stone-400">
                 <button
                   type="button"
                   onClick={() => setViewMode("grid")}
                   className={`p-1.5 rounded-lg transition cursor-pointer ${
                     viewMode === "grid"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-xs"
-                      : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                      ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs"
+                      : "text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
                   }`}
                   title="Grid View"
                   aria-label="Grid View"
@@ -466,8 +466,8 @@ const Dashboard = () => {
                   onClick={() => setViewMode("kanban")}
                   className={`p-1.5 rounded-lg transition cursor-pointer ${
                     viewMode === "kanban"
-                      ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-xs"
-                      : "text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                      ? "bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs"
+                      : "text-stone-400 hover:text-stone-700 dark:hover:text-stone-200"
                   }`}
                   title="Kanban Board View"
                   aria-label="Kanban View"
@@ -481,7 +481,7 @@ const Dashboard = () => {
                 <button
                   type="button"
                   onClick={handleClearFilters}
-                  className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 px-2.5 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/30 transition cursor-pointer"
+                  className="text-xs font-semibold text-stone-500 dark:text-stone-400 hover:text-orange-600 dark:hover:text-orange-400 px-2.5 py-1.5 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950/30 transition cursor-pointer"
                   title="Reset all search and filter conditions"
                 >
                   Clear Filters
@@ -497,36 +497,36 @@ const Dashboard = () => {
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div
                   key={n}
-                  className="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 space-y-3"
+                  className="bg-white dark:bg-[#1A1A1E] rounded-2xl p-5 border border-stone-200 dark:border-stone-800 space-y-3"
                 >
                   <div className="flex justify-between items-center">
-                    <div className="w-20 h-4 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
-                    <div className="w-12 h-4 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
+                    <div className="w-20 h-4 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
+                    <div className="w-12 h-4 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
                   </div>
                   <div className="space-y-2">
-                    <div className="w-3/4 h-5 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
-                    <div className="w-full h-3 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
-                    <div className="w-1/2 h-3 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
+                    <div className="w-3/4 h-5 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
+                    <div className="w-full h-3 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
+                    <div className="w-1/2 h-3 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
                   </div>
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
-                    <div className="w-24 h-4 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
-                    <div className="w-16 h-6 rounded shimmer-skeleton bg-slate-200 dark:bg-slate-800" />
+                  <div className="pt-3 border-t border-stone-100 dark:border-stone-800 flex justify-between items-center">
+                    <div className="w-24 h-4 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
+                    <div className="w-16 h-6 rounded shimmer-skeleton bg-stone-200 dark:bg-stone-800" />
                   </div>
                 </div>
               ))}
             </div>
           ) : tasks.length === 0 ? (
             /* Empty State */
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center max-w-md mx-auto shadow-xs mt-6">
-              <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl border border-stone-200/90 dark:border-stone-800 p-12 text-center max-w-md mx-auto shadow-xs mt-6">
+              <div className="w-12 h-12 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 flex items-center justify-center mx-auto mb-3">
                 <IconClipboardList className="w-6 h-6" />
               </div>
-              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+              <h3 className="text-base font-bold text-stone-800 dark:text-stone-200">
                 {hasActiveFilters
                   ? "No matching tasks found"
                   : "No tasks created yet"}
               </h3>
-              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+              <p className="text-xs sm:text-sm text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
                 {hasActiveFilters
                   ? "Try clearing or modifying your search criteria."
                   : "Your workspace is currently clear. Add a task to get started."}
@@ -535,14 +535,14 @@ const Dashboard = () => {
                 {hasActiveFilters ? (
                   <button
                     onClick={handleClearFilters}
-                    className="px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer"
+                    className="px-4 py-2 text-xs font-semibold text-stone-700 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 rounded-xl transition cursor-pointer"
                   >
                     Clear Filters
                   </button>
                 ) : (
                   <button
                     onClick={openCreate}
-                    className="inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer"
+                    className="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition cursor-pointer"
                   >
                     <IconPlus className="w-3.5 h-3.5" />
                     <span>Create Task</span>
