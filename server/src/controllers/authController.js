@@ -1,8 +1,6 @@
-import { OAuth2Client } from "google-auth-library";
+import { adminAuth } from "../config/firebase.js";
 import User from "../models/User.js";
 import { sendTokenCookie } from "../utils/token.js";
-
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res, next) => {
   try {
@@ -65,44 +63,57 @@ export const googleLogin = async (req, res, next) => {
   try {
     const { token } = req.body;
     if (!token) {
-      return res.status(400).json({ message: "Google credential token is required" });
+      return res.status(400).json({ message: "Firebase authentication token is required" });
     }
 
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      return res.status(500).json({ message: "GOOGLE_CLIENT_ID is not configured on the server" });
-    }
-
-    const ticket = await googleClient.verifyIdToken({
-      idToken: token,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    if (!decodedToken || !decodedToken.email) {
       return res.status(400).json({ message: "Unable to retrieve email from Google account" });
     }
 
-    const { sub: googleId, email, name } = payload;
+    const { uid, email, name } = decodedToken;
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({
+      $or: [{ email }, { firebaseUid: uid }, { googleId: uid }],
+    });
+
     if (user) {
+      let updated = false;
+      if (!user.firebaseUid) {
+        user.firebaseUid = uid;
+        updated = true;
+      }
       if (!user.googleId) {
-        user.googleId = googleId;
+        user.googleId = uid;
+        updated = true;
+      }
+      if (updated) {
         await user.save();
       }
     } else {
       user = await User.create({
         name: name || email.split("@")[0],
         email,
-        googleId,
+        googleId: uid,
+        firebaseUid: uid,
       });
     }
 
     sendTokenCookie(res, user._id);
     res.json({ user });
   } catch (err) {
-    if (err.message && (err.message.includes("Token used too late") || err.message.includes("Wrong recipient") || err.message.includes("invalid_token"))) {
-      return res.status(401).json({ message: "Invalid or expired Google token" });
+    console.error("Firebase auth error:", err.code || err.name, err.message);
+    if (
+      err.code?.startsWith?.("auth/") ||
+      (err.message &&
+        (err.message.includes("Decoding Firebase ID token failed") ||
+          err.message.includes("expired") ||
+          err.message.includes("incorrect") ||
+          err.message.includes("invalid")))
+    ) {
+      return res.status(401).json({
+        message: err.message || "Invalid or expired Firebase authentication token",
+      });
     }
     next(err);
   }

@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { signInWithPopup, signOut } from "firebase/auth";
 import api from "../api/axios";
+import { auth, googleProvider } from "../config/firebase";
 
 const AuthContext = createContext(null);
 
@@ -26,18 +28,33 @@ export const AuthProvider = ({ children }) => {
     setUser(res.data.user);
   };
 
+  const loginWithGoogle = async () => {
+    const result = await signInWithPopup(auth, googleProvider);
+    const idToken = await result.user.getIdToken();
+    const res = await api.post("/auth/google", { token: idToken });
+    setUser(res.data.user);
+    return res.data.user;
+  };
+
   const googleLogin = async (token) => {
     const res = await api.post("/auth/google", { token });
     setUser(res.data.user);
   };
 
   const logout = async () => {
+    try {
+      await signOut(auth);
+    } catch {
+      // Ignore client firebase signout errors
+    }
     await api.post("/auth/logout");
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, googleLogin }}>
+    <AuthContext.Provider
+      value={{ user, loading, login, register, logout, googleLogin, loginWithGoogle }}
+    >
       {children}
     </AuthContext.Provider>
   );
