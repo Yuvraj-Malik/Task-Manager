@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -15,6 +17,15 @@
     background-color: #f8fafc;
     color: #0f172a;
   }
+}
+
+.dark body {
+  background-color: #020617;
+  color: #f8fafc;
+}
+
+.dark * {
+  border-color: #1e293b;
 }
 
 /* Subtle, clean scrollbars */
@@ -83,6 +94,11 @@
   animation: shimmer 1.5s infinite linear;
 }
 
+.dark .shimmer-skeleton {
+  background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%);
+  background-size: 200% 100%;
+}
+
 /* Professional card styling */
 .pro-card {
   background-color: #ffffff;
@@ -94,4 +110,15 @@
 .pro-card:hover {
   border-color: #cbd5e1;
   box-shadow: 0 4px 12px 0 rgba(15, 23, 42, 0.06);
+}
+
+.dark .pro-card {
+  background-color: #0f172a;
+  border-color: #1e293b;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+.dark .pro-card:hover {
+  border-color: #334155;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.5);
 }

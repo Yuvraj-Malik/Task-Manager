@@ -41,6 +41,17 @@ export const AuthProvider = ({ children }) => {
     setUser(res.data.user);
   };
 
+  const updateProfile = async (data) => {
+    const res = await api.put("/auth/me", data);
+    setUser(res.data.user);
+    return res.data;
+  };
+
+  const updatePassword = async (data) => {
+    const res = await api.put("/auth/password", data);
+    return res.data;
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -53,7 +64,17 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, login, register, logout, googleLogin, loginWithGoogle }}
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        googleLogin,
+        loginWithGoogle,
+        updateProfile,
+        updatePassword,
+      }}
     >
       {children}
     </AuthContext.Provider>
