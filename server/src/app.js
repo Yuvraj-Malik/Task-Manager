@@ -41,6 +41,7 @@ app.get("/", (req, res) =>
   })
 );
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.use("/api/auth", authRoutes);
 app.use("/auth", authRoutes); // fallback for requests without /api prefix
 app.use("/api/tasks", taskRoutes);
