@@ -9,7 +9,6 @@ import {
   IconLock,
   IconMail,
   IconSpinner,
-  IconShield,
 } from "../components/Icons";
 
 const ForgotPassword = () => {
@@ -18,7 +17,6 @@ const ForgotPassword = () => {
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [demoCode, setDemoCode] = useState("");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -40,11 +38,8 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       const res = await forgotPassword(email.trim());
-      setDemoCode(res.resetCode || "");
-      if (res.resetCode) {
-        setCode(res.resetCode); // Pre-fill for ultra-convenient demo testing
-      }
-      setSuccess("Reset code generated! Please enter your new password below.");
+      setSuccess(res?.message || `A verification code has been sent to ${email.trim()}. Check your inbox.`);
+      setCode(""); // Keep code empty for user to type from their email
       setStep(2);
     } catch (err) {
       setError(err.response?.data?.message || "No account found with this email");
@@ -125,19 +120,6 @@ const ForgotPassword = () => {
             </div>
           )}
 
-          {/* Demo Helper Pill */}
-          {demoCode && step === 2 && (
-            <div className="mb-5 p-3 bg-blue-50 border border-blue-200/90 rounded-xl text-xs text-blue-800 flex items-center justify-between animate-scale-in">
-              <div className="flex items-center gap-2">
-                <IconShield className="w-4 h-4 text-blue-600" />
-                <span>Verification Code:</span>
-              </div>
-              <span className="font-mono font-bold tracking-widest text-sm text-blue-900 bg-white px-2.5 py-0.5 rounded-lg border border-blue-200">
-                {demoCode}
-              </span>
-            </div>
-          )}
-
           {step === 1 ? (
             /* Step 1: Request Verification Code */
             <form onSubmit={handleRequestCode} className="space-y-4">
@@ -180,18 +162,31 @@ const ForgotPassword = () => {
             <form onSubmit={handleResetPassword} className="space-y-4">
               {/* 6-Digit Code */}
               <div>
-                <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                  6-Digit Verification Code
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
+                    6-Digit Verification Code
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRequestCode}
+                    disabled={isSubmitting}
+                    className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer disabled:opacity-50 transition"
+                  >
+                    Resend Code
+                  </button>
+                </div>
                 <input
                   type="text"
                   required
                   maxLength={6}
-                  placeholder="123456"
+                  placeholder="Enter 6-digit code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-stone-50/70 border border-stone-300 rounded-xl text-center tracking-widest font-mono text-base font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
+                  className="w-full px-3.5 py-2.5 bg-stone-50/70 border border-stone-300 rounded-xl text-center tracking-widest font-mono text-base font-bold text-stone-900 placeholder:text-stone-400 placeholder:font-sans placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
                 />
+                <p className="text-[11px] text-stone-500 mt-1.5">
+                  We sent a code to <span className="font-semibold text-stone-700">{email}</span>. Check your inbox and spam folder.
+                </p>
               </div>
 
               {/* New Password */}

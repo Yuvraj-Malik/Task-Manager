@@ -1,6 +1,7 @@
 import { adminAuth } from "../config/firebase.js";
 import User from "../models/User.js";
 import { sendTokenCookie, clearTokenCookie } from "../utils/token.js";
+import { sendPasswordResetEmail } from "../utils/sendEmail.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -200,10 +201,12 @@ export const forgotPassword = async (req, res, next) => {
     user.resetPasswordExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
     await user.save();
 
+    // Send code to user's email address
+    await sendPasswordResetEmail(user.email, resetCode);
+
+    // Secure response: NEVER expose the reset code in the client response
     res.json({
-      message: "Reset code generated successfully",
-      email: user.email,
-      resetCode, // provided for instant demo & testing
+      message: `A 6-digit verification code has been sent to ${user.email}. Please check your inbox.`,
     });
   } catch (err) {
     next(err);
