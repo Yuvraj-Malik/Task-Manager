@@ -8,14 +8,17 @@ import nodemailer from "nodemailer";
  * 3. Ethereal Email test account (automatic fallback for zero-config testing)
  */
 const getTransporter = async () => {
+  const emailUser = process.env.EMAIL_USER?.trim();
+  const emailPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, "") : "";
+
   // Option 1: Gmail or standard named service
-  if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+  if (emailUser && emailPass) {
     if (process.env.EMAIL_SERVICE) {
       return nodemailer.createTransport({
-        service: process.env.EMAIL_SERVICE,
+        service: process.env.EMAIL_SERVICE.trim(),
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
+          user: emailUser,
+          pass: emailPass,
         },
       });
     }
@@ -23,12 +26,12 @@ const getTransporter = async () => {
     // Option 2: Custom SMTP host
     if (process.env.SMTP_HOST) {
       return nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
+        host: process.env.SMTP_HOST.trim(),
         port: Number(process.env.SMTP_PORT) || 587,
         secure: process.env.SMTP_SECURE === "true" || process.env.SMTP_PORT === "465",
         auth: {
-          user: process.env.SMTP_USER || process.env.EMAIL_USER,
-          pass: process.env.SMTP_PASS || process.env.EMAIL_PASS,
+          user: (process.env.SMTP_USER || emailUser).trim(),
+          pass: process.env.SMTP_PASS ? process.env.SMTP_PASS.replace(/\s+/g, "") : emailPass,
         },
       });
     }
@@ -37,8 +40,8 @@ const getTransporter = async () => {
     return nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: emailUser,
+        pass: emailPass,
       },
     });
   }
