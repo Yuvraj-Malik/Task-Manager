@@ -202,7 +202,12 @@ export const forgotPassword = async (req, res, next) => {
     await user.save();
 
     // Send code to user's email address
-    await sendPasswordResetEmail(user.email, resetCode);
+    const emailResult = await sendPasswordResetEmail(user.email, resetCode);
+    if (!emailResult.success) {
+      return res.status(500).json({
+        message: emailResult.error || "Failed to dispatch verification email. Please check server email credentials.",
+      });
+    }
 
     // Secure response: NEVER expose the reset code in the client response
     res.json({

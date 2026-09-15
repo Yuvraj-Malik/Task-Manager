@@ -11,19 +11,9 @@ const getTransporter = async () => {
   const emailUser = process.env.EMAIL_USER?.trim();
   const emailPass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.replace(/\s+/g, "") : "";
 
-  // Option 1: Gmail or standard named service
+  // If email credentials are provided
   if (emailUser && emailPass) {
-    if (process.env.EMAIL_SERVICE) {
-      return nodemailer.createTransport({
-        service: process.env.EMAIL_SERVICE.trim(),
-        auth: {
-          user: emailUser,
-          pass: emailPass,
-        },
-      });
-    }
-
-    // Option 2: Custom SMTP host
+    // Custom SMTP host if specified
     if (process.env.SMTP_HOST) {
       return nodemailer.createTransport({
         host: process.env.SMTP_HOST.trim(),
@@ -36,33 +26,24 @@ const getTransporter = async () => {
       });
     }
 
-    // Default to Gmail if EMAIL_USER and EMAIL_PASS are present without host
+    // High-performance direct SSL for Gmail (works reliably on Render cloud)
     return nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
         user: emailUser,
         pass: emailPass,
       },
+      tls: {
+        rejectUnauthorized: true,
+      },
     });
   }
 
-  // Fallback: Ethereal test account for local testing before user sets credentials
-  console.log("ℹ️ [EMAIL] No EMAIL_USER/EMAIL_PASS found in environment. Generating Ethereal test inbox...");
-  try {
-    const testAccount = await nodemailer.createTestAccount();
-    return nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-  } catch (err) {
-    console.warn("⚠️ [EMAIL] Could not generate test account:", err.message);
-    return null;
-  }
+  // If credentials are completely missing on the server
+  console.warn("⚠️ [EMAIL] EMAIL_USER or EMAIL_PASS environment variable is missing on this server!");
+  return null;
 };
 
 /**
@@ -149,11 +130,11 @@ export const sendPasswordResetEmail = async (toEmail, resetCode) => {
   };
 
   if (!transporter) {
-    console.log(`\n======================================================`);
-    console.log(`🔑 [TASKPULSE SECURITY] Password Reset Code for ${toEmail}:`);
-    console.log(`👉 CODE: ${resetCode}`);
-    console.log(`======================================================\n`);
-    return { success: true, simulated: true };
+    console.error(`❌ [TASKPULSE EMAIL] Missing EMAIL_USER or EMAIL_PASS on this server. Cannot dispatch email to ${toEmail}.`);
+    return {
+      success: false,
+      error: "Server email service is not configured. Please add EMAIL_USER and EMAIL_PASS in the Render Dashboard Environment settings.",
+    };
   }
 
   try {
