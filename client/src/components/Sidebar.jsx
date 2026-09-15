@@ -119,9 +119,9 @@ const Sidebar = ({
                         onSelectCategory(cat.id);
                         if (onClose) onClose();
                       }}
-                      className={`w-full flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-colors duration-150 cursor-pointer ${
                         active
-                          ? "bg-stone-200/80 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-semibold"
+                          ? "bg-stone-200/90 dark:bg-stone-800 text-stone-900 dark:text-stone-100 font-semibold shadow-xs"
                           : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-100/70 dark:hover:bg-stone-800/40"
                       }`}
                     >

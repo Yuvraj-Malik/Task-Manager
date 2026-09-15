@@ -24,12 +24,14 @@ import * as taskApi from "../api/tasks";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sort, setSort] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -37,35 +39,56 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const searchInputRef = useRef(null);
+  const isFirstMount = useRef(true);
 
   // Custom delete modal state
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadTasks = async () => {
-    setLoading(true);
+  // Only debounce typed search queries to avoid lag during instant category/filter clicks
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  const loadTasks = async (isInitial = false) => {
+    if (isInitial) {
+      setInitialLoading(true);
+    } else {
+      setIsFiltering(true);
+    }
     setError("");
     try {
       const params = {};
       if (statusFilter) params.status = statusFilter;
       if (priorityFilter) params.priority = priorityFilter;
       if (categoryFilter && categoryFilter !== "all") params.category = categoryFilter;
-      if (search) params.search = search;
+      if (debouncedSearch) params.search = debouncedSearch;
       if (sort) params.sort = sort;
       const res = await taskApi.fetchTasks(params);
       setTasks(res.data.tasks);
     } catch {
       setError("Could not load tasks. Please check your connection and try again.");
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setInitialLoading(false);
+      } else {
+        setIsFiltering(false);
+      }
     }
   };
 
   useEffect(() => {
-    const debounce = setTimeout(loadTasks, 250);
-    return () => clearTimeout(debounce);
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      loadTasks(true);
+    } else {
+      loadTasks(false);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, priorityFilter, categoryFilter, search, sort]);
+  }, [statusFilter, priorityFilter, categoryFilter, debouncedSearch, sort]);
 
   // Keyboard Shortcuts (/ to search, n for new task)
   useEffect(() => {
@@ -220,7 +243,7 @@ const Dashboard = () => {
                   Task Workspace
                 </h1>
                 {categoryFilter && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 animate-scale-in">
                     Category: {categoryFilter}
                   </span>
                 )}
@@ -491,8 +514,8 @@ const Dashboard = () => {
           </div>
 
           {/* Task Grid or Kanban View */}
-          {loading ? (
-            /* Skeleton Loader Grid */
+          {initialLoading ? (
+            /* Skeleton Loader Grid - ONLY shown on initial app load */
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[1, 2, 3, 4, 5, 6].map((n) => (
                 <div
@@ -517,7 +540,7 @@ const Dashboard = () => {
             </div>
           ) : tasks.length === 0 ? (
             /* Empty State */
-            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl border border-stone-200/90 dark:border-stone-800 p-12 text-center max-w-md mx-auto shadow-xs mt-6">
+            <div className="bg-white dark:bg-[#1A1A1E] rounded-2xl border border-stone-200/90 dark:border-stone-800 p-12 text-center max-w-md mx-auto shadow-xs mt-6 animate-fade-in">
               <div className="w-12 h-12 rounded-xl bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 flex items-center justify-center mx-auto mb-3">
                 <IconClipboardList className="w-6 h-6" />
               </div>
@@ -552,16 +575,23 @@ const Dashboard = () => {
             </div>
           ) : viewMode === "kanban" ? (
             /* Kanban Board View */
-            <KanbanBoard
-              tasks={tasks}
-              onEdit={openEdit}
-              onDelete={openDeleteModal}
-              onToggleStatus={handleToggleStatus}
-              onOpenCreate={openCreate}
-            />
+            <div className={`transition-opacity duration-150 ${isFiltering ? "opacity-60" : "opacity-100"}`}>
+              <KanbanBoard
+                tasks={tasks}
+                onEdit={openEdit}
+                onDelete={openDeleteModal}
+                onToggleStatus={handleToggleStatus}
+                onOpenCreate={openCreate}
+              />
+            </div>
           ) : (
-            /* Task Grid View */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            /* Task Grid View with smooth transition */
+            <div
+              key={`${categoryFilter || 'all'}-${statusFilter || 'all'}-${priorityFilter || 'all'}`}
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-fade-in transition-opacity duration-150 ${
+                isFiltering ? "opacity-60" : "opacity-100"
+              }`}
+            >
               {tasks.map((task) => (
                 <TaskCard
                   key={task._id}
