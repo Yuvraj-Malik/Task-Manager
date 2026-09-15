@@ -1,10 +1,10 @@
 import axios from "axios";
 
-// Dev requests go through Vite's proxy (/api -> http://localhost:5000),
-// so relative URLs work in both dev and after a same-origin production deploy.
+// In development, Vite's proxy routes /api -> http://localhost:5000.
+// In production, VITE_API_URL points to the live Render backend URL (e.g. https://taskpulse-api.onrender.com/api).
 const api = axios.create({
-  baseURL: "/api",
-  withCredentials: true, // required to send/receive the httpOnly JWT cookie
+  baseURL: import.meta.env.VITE_API_URL || "/api",
+  withCredentials: true, // required to send/receive httpOnly JWT cookies cross-origin
 });
 
 export default api;

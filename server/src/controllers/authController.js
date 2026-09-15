@@ -1,6 +1,6 @@
 import { adminAuth } from "../config/firebase.js";
 import User from "../models/User.js";
-import { sendTokenCookie } from "../utils/token.js";
+import { sendTokenCookie, clearTokenCookie } from "../utils/token.js";
 
 export const register = async (req, res, next) => {
   try {
@@ -45,7 +45,7 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = (req, res) => {
-  res.clearCookie("token");
+  clearTokenCookie(res);
   res.json({ message: "Logged out" });
 };
 
