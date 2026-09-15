@@ -62,6 +62,19 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const forgotPassword = async (email) => {
+    const res = await api.post("/auth/forgot-password", { email });
+    return res.data;
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    const res = await api.post("/auth/reset-password", { email, code, newPassword });
+    if (res.data.user) {
+      setUser(res.data.user);
+    }
+    return res.data;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -74,6 +87,8 @@ export const AuthProvider = ({ children }) => {
         loginWithGoogle,
         updateProfile,
         updatePassword,
+        forgotPassword,
+        resetPassword,
       }}
     >
       {children}
