@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   IconCalendar,
   IconCheck,
@@ -7,6 +7,7 @@ import {
   IconTrash,
   IconAlertCircle,
   IconLock,
+  IconChevronDown,
 } from "./Icons";
 
 const priorityConfig = {
@@ -94,7 +95,8 @@ const formatDueDate = (dateString, isCompleted) => {
   return { text: statusText, isOverdue, isToday };
 };
 
-const TaskCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
+const TaskCard = ({ task, onEdit, onDelete, onToggleStatus, onToggleSubtask }) => {
+  const [showSubtasks, setShowSubtasks] = useState(false);
   const isDone = task.status === "completed";
   const priority = priorityConfig[task.priority] || priorityConfig.medium;
   const catStyle = categoryStyles[task.category] || {
@@ -104,10 +106,21 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
   };
   const dueInfo = formatDueDate(task.dueDate, isDone);
 
+  const subtasks = Array.isArray(task.subtasks) ? task.subtasks : [];
+  const totalSubtasks = subtasks.length;
+  const completedSubtasks = subtasks.filter((s) => s.completed).length;
+  const percentSubtasks = totalSubtasks > 0 ? Math.round((completedSubtasks / totalSubtasks) * 100) : 0;
+
   return (
     <div
-      className={`pro-card p-4 sm:p-5 flex flex-col justify-between relative group ${
-        isDone ? "opacity-75 bg-stone-50/50 dark:bg-stone-900/40" : ""
+      className={`pro-card p-4 sm:p-5 flex flex-col justify-between relative group transition-all duration-200 ${
+        isDone
+          ? "opacity-75 bg-stone-50/50 dark:bg-stone-900/40"
+          : dueInfo?.isOverdue
+          ? "border-l-4 border-l-red-500/90 shadow-2xs"
+          : dueInfo?.isToday
+          ? "border-l-4 border-l-amber-500/90"
+          : ""
       }`}
     >
       <div>
@@ -129,6 +142,24 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${catStyle.dotClass}`} />
                 {task.category}
+              </span>
+            )}
+
+            {/* Urgency Badge Indicator */}
+            {dueInfo?.isOverdue && (
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/60 animate-fade-in">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+                </span>
+                OVERDUE
+              </span>
+            )}
+
+            {dueInfo?.isToday && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/60 animate-fade-in">
+                <span>⚡</span>
+                DUE TODAY
               </span>
             )}
           </div>
@@ -190,6 +221,71 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
             </p>
           )}
         </div>
+
+        {/* Subtasks Progress & Expandable Checklist */}
+        {totalSubtasks > 0 && (
+          <div className="mt-3 pt-2.5 border-t border-stone-100/90 dark:border-stone-800/60">
+            <button
+              type="button"
+              onClick={() => setShowSubtasks(!showSubtasks)}
+              className="w-full flex items-center justify-between text-xs text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 cursor-pointer group"
+            >
+              <span className="font-semibold text-[11px] uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                Subtasks ({completedSubtasks}/{totalSubtasks})
+              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400 font-semibold">
+                  {percentSubtasks}%
+                </span>
+                <IconChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    showSubtasks ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
+            </button>
+
+            {/* Visual Progress Bar */}
+            <div className="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-1 mt-1.5 overflow-hidden">
+              <div
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  percentSubtasks === 100
+                    ? "bg-emerald-600 dark:bg-emerald-500"
+                    : "bg-blue-600 dark:bg-blue-500"
+                }`}
+                style={{ width: `${percentSubtasks}%` }}
+              />
+            </div>
+
+            {/* Expanded Subtasks List */}
+            {showSubtasks && (
+              <div className="mt-2 space-y-1 animate-fade-in">
+                {subtasks.map((sub, idx) => (
+                  <label
+                    key={sub._id || idx}
+                    className="flex items-start gap-2 p-1.5 rounded-lg hover:bg-stone-100/60 dark:hover:bg-stone-800/40 text-xs cursor-pointer transition"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={sub.completed}
+                      onChange={() => onToggleSubtask && onToggleSubtask(task._id, sub._id || idx)}
+                      className="mt-0.5 w-3 h-3 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span
+                      className={`leading-tight select-none ${
+                        sub.completed
+                          ? "line-through text-stone-400 dark:text-stone-500"
+                          : "text-stone-700 dark:text-stone-300"
+                      }`}
+                    >
+                      {sub.title}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Card Footer: Due date & status button */}

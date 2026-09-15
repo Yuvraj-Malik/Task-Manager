@@ -1,4 +1,5 @@
 import Task from "../models/Task.js";
+import { decomposeTaskWithAI } from "../services/aiService.js";
 
 // GET /api/tasks?status=pending&priority=high&category=Work&sort=dueDate
 export const getTasks = async (req, res, next) => {
@@ -33,9 +34,22 @@ export const getTask = async (req, res, next) => {
   }
 };
 
+export const decomposeTask = async (req, res, next) => {
+  try {
+    const { title, description, category } = req.body;
+    if (!title?.trim()) {
+      return res.status(400).json({ message: "Task title is required for AI breakdown" });
+    }
+    const subtasks = await decomposeTaskWithAI({ title, description, category });
+    res.json({ subtasks });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const createTask = async (req, res, next) => {
   try {
-    const { title, description, status, priority, category, dueDate } = req.body;
+    const { title, description, status, priority, category, dueDate, subtasks } = req.body;
     if (!title) return res.status(400).json({ message: "Title is required" });
 
     const task = await Task.create({
@@ -46,6 +60,7 @@ export const createTask = async (req, res, next) => {
       priority,
       category: category || "Work",
       dueDate,
+      subtasks: Array.isArray(subtasks) ? subtasks : [],
     });
     res.status(201).json({ task });
   } catch (err) {
@@ -81,6 +96,24 @@ export const deleteTask = async (req, res, next) => {
     const task = await Task.findOneAndDelete({ _id: req.params.id, user: req.userId });
     if (!task) return res.status(404).json({ message: "Task not found" });
     res.json({ message: "Task deleted" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const toggleSubtask = async (req, res, next) => {
+  try {
+    const { id, subtaskId } = req.params;
+    const task = await Task.findOne({ _id: id, user: req.userId });
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    const subtask = task.subtasks.id(subtaskId);
+    if (!subtask) return res.status(404).json({ message: "Subtask not found" });
+
+    subtask.completed = !subtask.completed;
+    await task.save();
+
+    res.json({ task });
   } catch (err) {
     next(err);
   }

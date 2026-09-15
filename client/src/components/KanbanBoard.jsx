@@ -104,6 +104,13 @@ const KanbanCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
               {task.category}
             </span>
           )}
+
+          {dueInfo?.isOverdue && (
+            <span className="inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+              OVERDUE
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1">
@@ -149,6 +156,15 @@ const KanbanCard = ({ task, onEdit, onDelete, onToggleStatus }) => {
         <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 line-clamp-2 leading-relaxed">
           {task.description}
         </p>
+      )}
+
+      {task.subtasks?.length > 0 && (
+        <div className="mt-2.5 flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400">
+          <span>Subtasks</span>
+          <span className="font-semibold text-stone-700 dark:text-stone-300">
+            {task.subtasks.filter((s) => s.completed).length} / {task.subtasks.length}
+          </span>
+        </div>
       )}
 
       <div className="mt-3 pt-2.5 border-t border-stone-100 dark:border-stone-800/80 flex items-center justify-between gap-2">

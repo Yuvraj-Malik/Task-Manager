@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { IconAlertCircle, IconPlus, IconSpinner, IconX } from "./Icons";
+import { IconAlertCircle, IconPlus, IconSpinner, IconX, IconSparkles, IconCheck } from "./Icons";
+import { aiDecomposeTask } from "../api/tasks";
 
 const empty = {
   title: "",
@@ -7,6 +8,7 @@ const empty = {
   priority: "medium",
   category: "Work",
   dueDate: "",
+  subtasks: [],
 };
 
 const priorities = [
@@ -47,11 +49,14 @@ const TaskForm = ({ initialTask, onSubmit, onClose }) => {
           priority: initialTask.priority || "medium",
           category: initialTask.category || "Work",
           dueDate: initialTask.dueDate ? initialTask.dueDate.slice(0, 10) : "",
+          subtasks: Array.isArray(initialTask.subtasks) ? initialTask.subtasks : [],
         }
       : empty
   );
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDecomposingAI, setIsDecomposingAI] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
 
   // Close on escape key
   useEffect(() => {
@@ -69,6 +74,57 @@ const TaskForm = ({ initialTask, onSubmit, onClose }) => {
 
   const setPriority = (priority) => {
     setForm((prev) => ({ ...prev, priority }));
+  };
+
+  const handleDecomposeAI = async () => {
+    if (!form.title.trim()) {
+      setError("Enter a task title first so AI can break it down into subtasks.");
+      return;
+    }
+    setError("");
+    setIsDecomposingAI(true);
+    try {
+      const res = await aiDecomposeTask({
+        title: form.title,
+        description: form.description,
+        category: form.category,
+      });
+      const generated = res.data.subtasks || [];
+      setForm((prev) => ({
+        ...prev,
+        subtasks: [...prev.subtasks, ...generated],
+      }));
+    } catch {
+      setError("AI breakdown is momentarily unavailable. You can still add subtasks manually.");
+    } finally {
+      setIsDecomposingAI(false);
+    }
+  };
+
+  const handleAddSubtask = (e) => {
+    e?.preventDefault();
+    if (!newSubtaskTitle.trim()) return;
+    setForm((prev) => ({
+      ...prev,
+      subtasks: [...prev.subtasks, { title: newSubtaskTitle.trim(), completed: false }],
+    }));
+    setNewSubtaskTitle("");
+  };
+
+  const handleRemoveSubtask = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleToggleSubtask = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      subtasks: prev.subtasks.map((sub, i) =>
+        i === index ? { ...sub, completed: !sub.completed } : sub
+      ),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -238,6 +294,106 @@ const TaskForm = ({ initialTask, onSubmit, onClose }) => {
                 );
               })}
             </div>
+          </div>
+
+          {/* Subtasks Section with AI Breakdown */}
+          <div className="space-y-2.5 pt-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                  Subtasks
+                </label>
+                {form.subtasks.length > 0 && (
+                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-400">
+                    {form.subtasks.filter((s) => s.completed).length} / {form.subtasks.length}
+                  </span>
+                )}
+              </div>
+
+              {/* AI Decompose Trigger Button */}
+              <button
+                type="button"
+                onClick={handleDecomposeAI}
+                disabled={isDecomposingAI || !form.title.trim()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60 hover:bg-blue-100/80 dark:hover:bg-blue-900/40 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+                title="Automatically break down task title and description into actionable subtasks with AI"
+              >
+                {isDecomposingAI ? (
+                  <>
+                    <IconSpinner className="w-3.5 h-3.5 text-blue-600 animate-spin" />
+                    <span>Analyzing...</span>
+                  </>
+                ) : (
+                  <>
+                    <IconSparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    <span>Decompose with AI</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Quick add subtask input */}
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Add subtask step (press Enter)..."
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSubtask();
+                  }
+                }}
+                className="flex-1 bg-stone-50/70 dark:bg-stone-800/60 border border-stone-200 dark:border-stone-700 rounded-xl px-3 py-1.5 text-xs text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
+              />
+              <button
+                type="button"
+                onClick={handleAddSubtask}
+                disabled={!newSubtaskTitle.trim()}
+                className="px-3 py-1.5 text-xs font-semibold bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-300 rounded-xl transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Add
+              </button>
+            </div>
+
+            {/* Subtask list */}
+            {form.subtasks.length > 0 && (
+              <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                {form.subtasks.map((subtask, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-2 rounded-xl bg-stone-50/90 dark:bg-stone-800/50 border border-stone-200/80 dark:border-stone-700/80 text-xs transition"
+                  >
+                    <label className="flex items-center gap-2.5 flex-1 min-w-0 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={subtask.completed}
+                        onChange={() => handleToggleSubtask(idx)}
+                        className="w-3.5 h-3.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span
+                        className={`truncate ${
+                          subtask.completed
+                            ? "line-through text-stone-400 dark:text-stone-500"
+                            : "text-stone-800 dark:text-stone-200 font-medium"
+                        }`}
+                      >
+                        {subtask.title}
+                      </span>
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSubtask(idx)}
+                      className="text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 p-1 cursor-pointer transition"
+                      title="Remove subtask"
+                    >
+                      <IconX className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Actions */}

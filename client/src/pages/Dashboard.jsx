@@ -5,6 +5,8 @@ import TaskCard from "../components/TaskCard";
 import TaskForm from "../components/TaskForm";
 import DeleteConfirmModal from "../components/DeleteConfirmModal";
 import KanbanBoard from "../components/KanbanBoard";
+import CommandPalette from "../components/CommandPalette";
+import { useTheme } from "../context/ThemeContext";
 import {
   IconAlertCircle,
   IconArrowUpDown,
@@ -23,6 +25,7 @@ import {
 import * as taskApi from "../api/tasks";
 
 const Dashboard = () => {
+  const { isDark, toggleTheme } = useTheme();
   const [tasks, setTasks] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [isFiltering, setIsFiltering] = useState(false);
@@ -37,6 +40,7 @@ const Dashboard = () => {
   const [editingTask, setEditingTask] = useState(null);
   const [viewMode, setViewMode] = useState("grid"); // "grid" | "kanban"
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   const searchInputRef = useRef(null);
   const isFirstMount = useRef(true);
@@ -90,18 +94,25 @@ const Dashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, priorityFilter, categoryFilter, debouncedSearch, sort]);
 
-  // Keyboard Shortcuts (/ to search, n for new task)
+  // Keyboard Shortcuts (Ctrl/Cmd+K for Command Palette, / to search, n for new task)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Global shortcut for Command Palette works anywhere
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
       const targetTag = e.target.tagName?.toLowerCase();
       if (targetTag === "input" || targetTag === "textarea") {
         return;
       }
 
-      if (e.key === "/" && !formOpen) {
+      if (e.key === "/" && !formOpen && !commandPaletteOpen) {
         e.preventDefault();
         searchInputRef.current?.focus();
-      } else if ((e.key === "n" || e.key === "N") && !formOpen) {
+      } else if ((e.key === "n" || e.key === "N") && !formOpen && !commandPaletteOpen) {
         e.preventDefault();
         setEditingTask(null);
         setFormOpen(true);
@@ -110,7 +121,7 @@ const Dashboard = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [formOpen]);
+  }, [formOpen, commandPaletteOpen]);
 
   const handleCreate = async (data) => {
     const res = await taskApi.createTask(data);
@@ -151,6 +162,30 @@ const Dashboard = () => {
       );
     } catch {
       setError("Failed to update task status.");
+    }
+  };
+
+  const handleToggleSubtask = async (taskId, subtaskId) => {
+    try {
+      setTasks((prev) =>
+        prev.map((t) => {
+          if (t._id !== taskId) return t;
+          return {
+            ...t,
+            subtasks: t.subtasks?.map((s, idx) =>
+              (s._id === subtaskId || idx === subtaskId)
+                ? { ...s, completed: !s.completed }
+                : s
+            ),
+          };
+        })
+      );
+      const res = await taskApi.toggleSubtask(taskId, subtaskId);
+      setTasks((prev) =>
+        prev.map((t) => (t._id === taskId ? res.data.task : t))
+      );
+    } catch {
+      setError("Failed to update subtask status.");
     }
   };
 
@@ -202,7 +237,12 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-[#F7F5F0] dark:bg-[#121215] text-stone-900 dark:text-stone-100 warm-grid-bg transition-colors">
-      <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        onOpenCommandPalette={() => setCommandPaletteOpen(true)}
+        tasks={tasks}
+        onSelectTask={(task) => openEdit(task)}
+      />
 
       <div className="flex w-full">
         {/* Spacious Sidebar Navigation */}
@@ -599,6 +639,7 @@ const Dashboard = () => {
                   onEdit={openEdit}
                   onDelete={openDeleteModal}
                   onToggleStatus={handleToggleStatus}
+                  onToggleSubtask={handleToggleSubtask}
                 />
               ))}
             </div>
@@ -622,6 +663,20 @@ const Dashboard = () => {
         onConfirm={handleConfirmDelete}
         onCancel={() => setDeleteTarget(null)}
         isDeleting={isDeleting}
+      />
+
+      {/* Global Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        tasks={tasks}
+        onOpenCreate={openCreate}
+        onSelectCategory={(cat) => setCategoryFilter(cat === "all" ? "" : cat)}
+        onSelectViewMode={(mode) => setViewMode(mode)}
+        onToggleTheme={toggleTheme}
+        onEditTask={openEdit}
+        onToggleTaskStatus={handleToggleStatus}
+        isDark={isDark}
       />
     </div>
   );
