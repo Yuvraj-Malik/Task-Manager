@@ -213,6 +213,31 @@ export const forgotPassword = async (req, res, next) => {
   }
 };
 
+export const verifyResetCode = async (req, res, next) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ message: "Email and verification code are required" });
+    }
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      resetPasswordToken: code.trim(),
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired verification code. Please check your email or request a new code.",
+      });
+    }
+
+    res.json({ message: "Verification code confirmed successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const resetPassword = async (req, res, next) => {
   try {
     const { email, code, newPassword } = req.body;

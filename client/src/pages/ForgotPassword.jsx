@@ -12,7 +12,8 @@ import {
 } from "../components/Icons";
 
 const ForgotPassword = () => {
-  const [step, setStep] = useState(1); // 1: request code, 2: verify & reset
+  // 1: Request email code, 2: Verify 6-digit code, 3: Set new password
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -23,14 +24,14 @@ const ForgotPassword = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { forgotPassword, resetPassword } = useAuth();
+  const { forgotPassword, verifyResetCode, resetPassword } = useAuth();
   const navigate = useNavigate();
 
-  // Step 1: Request verification code
+  // Step 1: Request verification code to email
   const handleRequestCode = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!email.trim()) {
-      setError("Please enter your email address");
+      setError("Please enter your account email address");
       return;
     }
     setError("");
@@ -38,8 +39,8 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       const res = await forgotPassword(email.trim());
-      setSuccess(res?.message || `A verification code has been sent to ${email.trim()}. Check your inbox.`);
-      setCode(""); // Keep code empty for user to type from their email
+      setSuccess(res?.message || `A verification code has been sent to ${email.trim()}.`);
+      setCode("");
       setStep(2);
     } catch (err) {
       setError(err.response?.data?.message || "No account found with this email");
@@ -48,16 +49,33 @@ const ForgotPassword = () => {
     }
   };
 
-  // Step 2: Submit code and new password
+  // Step 2: Verify 6-digit code first before letting user access password change
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    if (!code.trim()) {
+      setError("Please enter the 6-digit verification code");
+      return;
+    }
+    setError("");
+    setSuccess("");
+    setIsSubmitting(true);
+    try {
+      await verifyResetCode(email.trim(), code.trim());
+      setSuccess("Code verified successfully! Create your new password below.");
+      setStep(3);
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid or expired verification code. Please check your email.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Step 3: Change password and sign in
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (!code.trim()) {
-      setError("Please enter the 6-digit reset code");
-      return;
-    }
     if (newPassword.length < 6) {
       setError("New password must be at least 6 characters");
       return;
@@ -70,12 +88,12 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
     try {
       await resetPassword(email.trim(), code.trim(), newPassword);
-      setSuccess("Password reset successfully! Redirecting to workspace...");
+      setSuccess("Password updated successfully! Redirecting to workspace...");
       setTimeout(() => {
         navigate("/");
       }, 1200);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to reset password. Please verify the code.");
+      setError(err.response?.data?.message || "Failed to update password. Code may have expired.");
     } finally {
       setIsSubmitting(false);
     }
@@ -85,21 +103,55 @@ const ForgotPassword = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#F7F5F0] warm-grid-bg px-4 py-12">
       <div className="w-full max-w-md">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xs mb-3 hover:scale-105 transition-transform">
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="text-center mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 text-white shadow-xs mb-3 hover:scale-105 transition-transform"
+          >
+            <svg
+              className="w-6 h-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <rect width="18" height="18" x="3" y="3" rx="2" />
               <path d="m9 12 2 2 4-4" />
             </svg>
           </Link>
+
           <h1 className="text-2xl font-bold text-stone-900 tracking-tight">
-            {step === 1 ? "Reset your password" : "Create new password"}
+            {step === 1 && "Reset your password"}
+            {step === 2 && "Verify reset code"}
+            {step === 3 && "Create new password"}
           </h1>
+
           <p className="text-sm text-stone-500 mt-1">
-            {step === 1
-              ? "Enter your account email to receive a verification code"
-              : `Enter the 6-digit code sent to ${email}`}
+            {step === 1 && "Enter your account email to receive a 6-digit verification code"}
+            {step === 2 && `Enter the 6-digit code sent to ${email}`}
+            {step === 3 && "Verification confirmed. Choose your new password."}
           </p>
+
+          {/* 3-Step Indicator */}
+          <div className="flex items-center justify-center gap-2 mt-4">
+            <div
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                step >= 1 ? "w-8 bg-blue-600" : "w-4 bg-stone-300"
+              }`}
+            />
+            <div
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                step >= 2 ? "w-8 bg-blue-600" : "w-4 bg-stone-300"
+              }`}
+            />
+            <div
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                step >= 3 ? "w-8 bg-blue-600" : "w-4 bg-stone-300"
+              }`}
+            />
+          </div>
         </div>
 
         {/* Card Container */}
@@ -120,8 +172,8 @@ const ForgotPassword = () => {
             </div>
           )}
 
-          {step === 1 ? (
-            /* Step 1: Request Verification Code */
+          {/* STEP 1: Enter Email */}
+          {step === 1 && (
             <form onSubmit={handleRequestCode} className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
@@ -153,14 +205,15 @@ const ForgotPassword = () => {
                     <span>Sending Code...</span>
                   </>
                 ) : (
-                  <span>Send Reset Code</span>
+                  <span>Send Verification Code</span>
                 )}
               </button>
             </form>
-          ) : (
-            /* Step 2: Enter Code and New Password */
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              {/* 6-Digit Code */}
+          )}
+
+          {/* STEP 2: Verify 6-digit code first */}
+          {step === 2 && (
+            <form onSubmit={handleVerifyCode} className="space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
@@ -168,7 +221,7 @@ const ForgotPassword = () => {
                   </label>
                   <button
                     type="button"
-                    onClick={handleRequestCode}
+                    onClick={() => handleRequestCode()}
                     disabled={isSubmitting}
                     className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline cursor-pointer disabled:opacity-50 transition"
                   >
@@ -182,11 +235,48 @@ const ForgotPassword = () => {
                   placeholder="Enter 6-digit code"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-stone-50/70 border border-stone-300 rounded-xl text-center tracking-widest font-mono text-base font-bold text-stone-900 placeholder:text-stone-400 placeholder:font-sans placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
+                  className="w-full px-3.5 py-3 bg-stone-50/70 border border-stone-300 rounded-xl text-center tracking-widest font-mono text-lg font-bold text-stone-900 placeholder:text-stone-400 placeholder:font-sans placeholder:font-normal placeholder:text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
                 />
                 <p className="text-[11px] text-stone-500 mt-1.5">
-                  We sent a code to <span className="font-semibold text-stone-700">{email}</span>. Check your inbox and spam folder.
+                  We emailed your code to <span className="font-semibold text-stone-700">{email}</span>. Check your inbox and spam folder.
                 </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || code.length < 6}
+                className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition-all shadow-xs hover:shadow cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <IconSpinner className="w-4 h-4" />
+                    <span>Verifying Code...</span>
+                  </>
+                ) : (
+                  <span>Verify Code & Continue</span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(1);
+                  setError("");
+                  setSuccess("");
+                }}
+                className="w-full text-xs text-stone-500 hover:text-stone-700 py-1 transition cursor-pointer"
+              >
+                ← Back to change email
+              </button>
+            </form>
+          )}
+
+          {/* STEP 3: Now change password */}
+          {step === 3 && (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="p-3 bg-blue-50/70 border border-blue-200/80 rounded-xl text-xs text-blue-800 flex items-center gap-2 mb-2">
+                <IconCheckCircle className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                <span>Identity verified for <strong>{email}</strong>. Enter your new password.</span>
               </div>
 
               {/* New Password */}
@@ -221,7 +311,7 @@ const ForgotPassword = () => {
               {/* Confirm Password */}
               <div>
                 <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                  Confirm Password
+                  Confirm New Password
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
@@ -247,23 +337,11 @@ const ForgotPassword = () => {
                 {isSubmitting ? (
                   <>
                     <IconSpinner className="w-4 h-4" />
-                    <span>Resetting Password...</span>
+                    <span>Updating Password...</span>
                   </>
                 ) : (
                   <span>Update Password & Sign In</span>
                 )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setStep(1);
-                  setError("");
-                  setSuccess("");
-                }}
-                className="w-full text-xs text-stone-500 hover:text-stone-700 py-1 transition cursor-pointer"
-              >
-                ← Back to enter another email
               </button>
             </form>
           )}

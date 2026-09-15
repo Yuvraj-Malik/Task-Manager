@@ -67,6 +67,11 @@ export const AuthProvider = ({ children }) => {
     return res.data;
   };
 
+  const verifyResetCode = async (email, code) => {
+    const res = await api.post("/auth/verify-code", { email, code });
+    return res.data;
+  };
+
   const resetPassword = async (email, code, newPassword) => {
     const res = await api.post("/auth/reset-password", { email, code, newPassword });
     if (res.data.user) {
@@ -88,6 +93,7 @@ export const AuthProvider = ({ children }) => {
         updateProfile,
         updatePassword,
         forgotPassword,
+        verifyResetCode,
         resetPassword,
       }}
     >
